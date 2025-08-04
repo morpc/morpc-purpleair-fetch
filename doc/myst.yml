@@ -1,0 +1,7 @@
+version: 1
+site:
+    template: book-theme
+    title: Mid-Ohio Regional Planning Commission
+    options:
+        logo: ./assets/HORIZONTAL_LOGOS_PRIMARY_COLOR_V2.png
+        logo_text: Mid-Ohio Regional Planning Commission
