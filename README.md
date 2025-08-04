@@ -8,8 +8,8 @@ In July 2025, MORPC Data Team began a process to update process which fetched, s
 
 ## Roadmap
 
- [ ] 1. Develop air quality sensor model for sqlite database, including Sensor Deployment Tracking sheet.
- [ ] 2. Fetch script for Ramboll database and input into MORPC sqlite database.
- [ ] 3. Input data from MORPC sharepoint into sqlite database. This may also act as a script for manual downloads using the [PurpleAir Data Download tool](https://gitlab.com/purpleair-api-clients/data-download-tool/-/tree/main)
- [ ] 4. Fetch data directly from PurpleAir API.
- [ ] 5. Automate fetch to pull data from PurpleAir.
+ - [ ] 1. Develop air quality sensor model for sqlite database, including Sensor Deployment Tracking sheet.
+ - [ ] 2. Fetch script for Ramboll database and input into MORPC sqlite database.
+ - [ ] 3. Input data from MORPC sharepoint into sqlite database. This may also act as a script for manual downloads using the [PurpleAir Data Download tool](https://gitlab.com/purpleair-api-clients/data-download-tool/-/tree/main)
+ - [ ] 4. Fetch data directly from PurpleAir API.
+ - [ ] 5. Automate fetch to pull data from PurpleAir.
