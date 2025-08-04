@@ -1,0 +1,50 @@
+# Reference: https://specs.frictionlessdata.io//table-schema/
+fields:
+  - name: STRINGFIELD
+    type: string
+    description: 'This field contains strings, that is, sequences of characters.'
+  - name: INTEGERFIELD
+    type: integer
+    description: 'This field contains integers - that is whole numbers.'
+  - name: NUMBERFIELD
+    type: number
+    description: 'This field contains numbers of any kind including decimals.'
+  - name: DATEFIELD
+    type: date
+    description: 'This field contains a date without a time.'
+  - name: TIMEFIELD
+    type: time
+    description: 'This field contains a time without a date.'
+  - name: DATETIMEFIELD
+    type: datetime
+    description: 'This field contains a date with a time.' 
+  - name: YEARFIELD
+    type: year
+    description: 'This field contains a year in YYYY format.'
+  - name: YEARMONTHFIELD
+    type: yearmonth
+    description: 'This field contains a year and month in YYYY-MM format.'     
+  - name: DURATIONFIELD
+    type: duration
+    description: 'This field contains a time duration that complies with XMLSchema.  See https://www.w3.org/TR/xmlschema-2/#duration' 
+  - name: BOOLEANFIELD
+    type: boolean
+    description: 'This field contains boolean (true/false) data.'    
+  - name: GEOPOINTFIELD
+    type: geopoint
+    description: 'This field contains data describing a geographic point, usually in the format "lon,lat" or [lon,lat]' 
+  - name: GEOJSONFIELD
+    type: geojson
+    description: 'This field contains a JSON object according to GeoJSON or TopoJSON spec.' 
+  - name: OBJECTFIELD
+    type: object
+    description: 'This field contains data which is valid JSON.'
+  - name: ARRAYFIELD
+    type: array
+    description: 'This field contains data that is a valid JSON format arrays.'   
+missingValues:
+  - ''
+primaryKey:
+  - STRINGFIELD
+  - YEARFIELD
+  
