@@ -5,13 +5,6 @@ from geoalchemy2 import Geometry, load_spatialite
 from typing import List, Optional
 from datetime import datetime, date
 
-# Create engine to store in memory for development
-engine = create_engine(
-    "sqlite+pysqlite:///:memory:",
-    plugins=['geoalchemy'],
-    echo=True)
-listen(engine, "connect", load_spatialite) # load spatialite plugin on connect
-
 # Create base class
 class Base(DeclarativeBase):
     pass
