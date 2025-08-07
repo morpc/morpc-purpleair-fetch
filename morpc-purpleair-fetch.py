@@ -10,7 +10,7 @@ from sqlalchemy.event import listen
 from geoalchemy2 import load_spatialite
 from sqlalchemy.orm import Session
 
-from .model import engine, Sensor, Location, Deployment
+from .model import Sensor, Location, Deployment, Base
 
 # Create engine to store in memory for development
 engine = create_engine(
@@ -19,5 +19,4 @@ engine = create_engine(
     echo=True)
 listen(engine, "connect", load_spatialite) # load spatialite plugin on connect
 
-with Session(engine) as session:
-    engine.metadata()
+Base.metadata
