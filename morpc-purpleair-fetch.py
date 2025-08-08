@@ -1,7 +1,6 @@
 ## Functions and classes for morpc-purpleair-fetch
 
 # Import dependencies
-import morpc
 import pandas as pd
 import geopandas as gpd
 
@@ -13,10 +12,10 @@ from sqlalchemy.orm import Session
 from .model import Sensor, Location, Deployment, Base
 
 # Create engine to store in memory for development
+
 engine = create_engine(
-    "sqlite+pysqlite:///:memory:",
-    plugins=['geoalchemy2'],
+    "sqlite://",
     echo=True)
 listen(engine, "connect", load_spatialite) # load spatialite plugin on connect
 
-Base.metadata
+Base.metadata.create_all(engine)
