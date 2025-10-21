@@ -1,3 +1,6 @@
+.env 
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -194,3 +197,5 @@ cython_debug/
 .cursorindexingignore
 # MyST build outputs
 _build
+
+Lib/
