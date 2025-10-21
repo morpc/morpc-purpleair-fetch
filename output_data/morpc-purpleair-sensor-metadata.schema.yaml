@@ -1,0 +1,33 @@
+fields:
+  - name: sensor_index
+    type: integer
+    description: 'The sensors index. Can be used to add a sensor to a group or view its details. Assigned by PurpleAir after registered.'
+  - name: date_created
+    type: datetime
+    description: 'The UNIX time stamp from when the device was created.'
+  - name: name
+    type: string
+    description: 'The name of the sensor. Given at the time of registration. Should not change throughout the life of the sensor.'
+  - name: location_type
+    type: integer
+    description: 'The location type. Possible values are: 0 = Outside or 1 = Inside. Entered at the time of registration' 
+  - name: model
+    type: string
+    description: 'The PurpleAir device model.'
+  - name: hardware
+    type: string
+    description: 'Sensors and hardware detectable by the devices firmware'
+  - name: latitude
+    type: number
+    description: 'The latitude position value for the sensor. Entered at the time of registration.'
+  - name: longitude
+    type: number
+    description: 'The longitude position value for the sensor. Entered at the time of registration.'  
+  - name: altitude
+    type: number
+    description: 'The altitude position value for the sensor. Entered at the time of registration.'
+missingValues:
+  - ''
+primaryKey:
+  - sensor_index
+  
