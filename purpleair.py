@@ -1,4 +1,5 @@
 # Get API keys from .env file
+
 with open('.env') as env:
     lines = env.readlines()
     env = {}
@@ -37,7 +38,7 @@ def get_organization():
 
     return json
 
-def get_sensor_index(log_path, sheet_name):
+def get_deployed_sensors(log_path, sheet_name):
     """
     Fetch list of sensor indexes.
 
@@ -196,5 +197,93 @@ def update_group_members(update, group_id):
 
     print(f'Group {group_id} is up to date.')
 
+def get_members_metadata(group_id):
+    import requests
+    import pandas as pd
+    import datetime
+    fields=['name', 'model', 'hardware', 'date_created', 'location_type', 'latitude', 'longitude', 'altitude']
+
+    params = {
+        'fields': ",".join(fields)
+    }
+
+    r = requests.get(f"{GROUPS_URL}/{group_id}/members", headers=read_header, params=params)
+
+    if r.status_code != 200:
+        print(r.url)
+        print(r.content)
+        raise requests.HTTPError
+    else:
+        try:
+            json = r.json()
+        except:
+            raise requests.JSONDecodeError
+    r.close()
+
+    df = pd.DataFrame([x for x in json['data']], columns=json['fields'])
+    df['date_created'] = [datetime.datetime.fromtimestamp(x, datetime.timezone.utc) for x in df['date_created']]
+
+    return df
+
+def get_members_health(group_id):
+    import requests
+    import pandas as pd
+    import datetime
+
+    fields=['name', 'rssi', 'firmware_version', 'firmware_upgrade', 'uptime', 'pa_latency', 'memory', 'last_seen', 'last_modified', 'channel_state']
+
+    params = {
+        'fields': ",".join(fields)
+    }
+
+    r = requests.get(f"{GROUPS_URL}/{group_id}/members", headers=read_header, params=params)
+
+    if r.status_code != 200:
+        print(r.url)
+        print(r.content)
+        raise requests.HTTPError
+    else:
+        try:
+            json = r.json()
+        except:
+            raise requests.JSONDecodeError
+    r.close()
+
+    df = pd.DataFrame([x for x in json['data']], columns=json['fields'])
+    df['last_seen'] = [datetime.datetime.fromtimestamp(x, datetime.timezone.utc) for x in df['last_seen']]
+    df['last_modified'] = [datetime.datetime.fromtimestamp(x, datetime.timezone.utc) for x in df['last_modified']]
+    df['datetime_check'] = datetime.datetime.fromtimestamp(json['data_time_stamp'], datetime.timezone.utc)
+
+    df['status'] = None ## add calculation for status. 
+
+    return df
+
+def get_members_data(group_id):
+    import requests
+    import pandas as pd
+    import datetime
+
+    fields = ['name', 'last_seen', 'pm2.5_a', 'pm2.5_b', 'pm1.0_a', 'pm1.0_b', 'humidity', 'temperature', 'pressure']
+
+    params = {
+        'fields': ",".join(fields)
+    }
+
+    r = requests.get(f"{GROUPS_URL}/{group_id}/members", headers=read_header, params=params)
+
+    if r.status_code != 200:
+        print(r.url)
+        print(r.content)
+        raise requests.HTTPError
+    else:
+        try:
+            json = r.json()
+        except:
+            raise requests.JSONDecodeError
+    r.close()
+
+    df = pd.DataFrame([x for x in json['data']], columns=json['fields'])
+    df['last_seen'] = [datetime.datetime.fromtimestamp(x, datetime.timezone.utc) for x in df['last_seen']]
 
 
+    return df
