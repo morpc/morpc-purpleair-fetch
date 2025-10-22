@@ -1,4 +1,13 @@
 # Get API keys from .env file
+import os
+import logging
+from sys import exception
+
+logging.basicConfig(level=logging.DEBUG,
+                    force=True,
+                    format='%(asctime)s | %(levelname)s | %(name)s : %(message)s'
+                    )
+logger = logging.getLogger(__name__)
 
 with open('.env') as env:
     lines = env.readlines()
@@ -8,7 +17,6 @@ with open('.env') as env:
         env[k] = v.strip()
 
 # Construct headers
-
 read_header = {
 'X-API-Key': env['READ_KEY']
 }
@@ -58,9 +66,11 @@ def get_deployed_sensors(log_path, sheet_name):
     import pandas as pd
     import math
 
+    logger.debug(f"Reading deployment log from {log_path}, sheet_name {sheet_name}")
     deployments = pd.read_excel(log_path, sheet_name=sheet_name).drop(0)
     deployed = deployments.loc[(~deployments['Sensor ID Deployment'].str.endswith('00'))&(deployments['Deployment_End'].isna())]
     sensor_index = [int(x) for x in deployed.Sensor_Index_ID if not math.isnan(x)]
+    logger.debug(f"{len(sensor_index)} Sensors: {", ".join([str(x) for x in sensor_index])}")
 
     return sensor_index
 
@@ -72,6 +82,7 @@ def post_group(group_name):
     }
 
     r = requests.post(GROUPS_URL, headers=write_header, params=params)
+    logger.debug(f"url: {r.url} headers: {r.headers}")
     if r.status_code != 201:
         print(r.content)
         raise requests.HTTPError
@@ -86,6 +97,8 @@ def get_groups():
     import requests
 
     r = requests.get(GROUPS_URL, headers=read_header)
+    logger.debug(f"url: {r.url} headers: {r.headers}")
+
     if r.status_code != 200:
         print(r.content)
         raise requests.HTTPError
@@ -102,6 +115,7 @@ def get_group_details(group_id):
     import requests
 
     r = requests.get(f"{GROUPS_URL}/{group_id}", headers=read_header)
+    logger.debug(f"url: {r.url} headers: {r.headers}")
 
     if r.status_code != 200:
         print(r.url)
@@ -120,6 +134,8 @@ def delete_group(group_id):
     import requests
 
     r = requests.delete(f"{GROUPS_URL}/{group_id}", headers=write_header)
+    logger.debug(f"url: {r.url} headers: {r.headers}")
+
     if r.status_code != 204:
         print(r.url)
         print(r.content)
@@ -137,6 +153,8 @@ def post_member(group_id, sensor_index):
     }
 
     r = requests.post(f"{GROUPS_URL}/{group_id}/members", headers=write_header, params=params)
+    logger.debug(f"url: {r.url} headers: {r.headers}")
+
     if r.status_code != 201:
         print(r.content)
         raise requests.HTTPError
@@ -151,6 +169,8 @@ def delete_member(group_id, sensor_index):
     import requests
 
     r = requests.delete(f"{GROUPS_URL}/{group_id}/members/{sensor_index}", headers=write_header)
+    logger.debug(f"url: {r.url} headers: {r.headers}")
+
     if r.status_code != 204:
         print(r.content)
         raise requests.HTTPError
@@ -163,8 +183,8 @@ def check_group_members(sensor_index, group_id):
     details = get_group_details(group_id=group_id)
     in_group = [x['sensor_index'] for x in details['members']]
 
-    print(f"{len(sensor_index)} sensors in index from deployment log: {", ".join([str(x) for x in sensor_index])}")
-    print(f"{len(in_group)} sensors in API group: {", ".join([str(x) for x in in_group])}")
+    logger.debug(f"{len(sensor_index)} sensors in index from deployment log: {", ".join([str(x) for x in sensor_index])}")
+    logger.debug(f"{len(in_group)} sensors in API group: {", ".join([str(x) for x in in_group])}")
 
     to_add = []
     for x in sensor_index:
@@ -182,20 +202,20 @@ def check_group_members(sensor_index, group_id):
 def update_group_members(update, group_id):
 
     if len(update['to_add']) > 0:
-        print(f'Adding sensor {', '.join([str(x) for x in update['to_add']])} to {group_id}')
+        logger.debug(f'Adding sensor {', '.join([str(x) for x in update['to_add']])} to {group_id}')
         for sensor in update['to_add']:
             post_member(group_id, sensor)
     else:
-        print('No sensors to add.')
+        logger.debug('No sensors to add.')
 
     if len(update['to_remove']) > 0:
-        print(f'Removing sensors {', '.join({[str(x) for x in update['to_remove']]})} from {group_id}')
+        logger.debug(f'Removing sensors {', '.join({[str(x) for x in update['to_remove']]})} from {group_id}')
         for sensor in update['to_remove']:
             delete_member(group_id, sensor)
     else:
-        print('No sensors to remove.')
+        logger.debug('No sensors to remove.')
 
-    print(f'Group {group_id} is up to date.')
+    logger.debug(f'Group {group_id} is up to date.')
 
 def get_members_metadata(group_id):
     import requests
@@ -208,15 +228,16 @@ def get_members_metadata(group_id):
     }
 
     r = requests.get(f"{GROUPS_URL}/{group_id}/members", headers=read_header, params=params)
+    logger.debug(f"url: {r.url} headers: {r.headers}")
 
     if r.status_code != 200:
-        print(r.url)
-        print(r.content)
+        logger.error(f"Unsuccessful GET response code: {r.status_code} from {r.url}")
         raise requests.HTTPError
     else:
         try:
             json = r.json()
         except:
+            logger.error(f"JSON decoder error")
             raise requests.JSONDecodeError
     r.close()
 
@@ -237,15 +258,16 @@ def get_members_health(group_id):
     }
 
     r = requests.get(f"{GROUPS_URL}/{group_id}/members", headers=read_header, params=params)
+    logger.debug(f"url: {r.url} headers: {r.headers}")
 
     if r.status_code != 200:
-        print(r.url)
-        print(r.content)
+        logger.error(f"Unsuccessful GET response code: {r.status_code} from {r.url}")
         raise requests.HTTPError
     else:
         try:
             json = r.json()
         except:
+            logger.error(f"JSON decoder error")
             raise requests.JSONDecodeError
     r.close()
 
@@ -270,15 +292,16 @@ def get_members_data(group_id):
     }
 
     r = requests.get(f"{GROUPS_URL}/{group_id}/members", headers=read_header, params=params)
+    logger.debug(f"url: {r.url} headers: {r.headers}")
 
     if r.status_code != 200:
-        print(r.url)
-        print(r.content)
+        logger.error(f"Unsuccessful GET response code: {r.status_code} from {r.url}")
         raise requests.HTTPError
     else:
         try:
             json = r.json()
         except:
+            logger.error(f"JSON decoder error")
             raise requests.JSONDecodeError
     r.close()
 
