@@ -1,0 +1,36 @@
+fields:
+  - name: sensor_index
+    type: integer
+    description: 'The sensors index. Can be used to add a sensor to a group or view its details'
+  - name: last_seen
+    type: datetime
+    description: 'The UNIX time stamp of the last time the server received data from the device'
+  - name: name
+    type: string
+    description: 'The name of the sensor. Given at the time of registration. Should not change throughout the life of the sensor.'
+  - name: humidity
+    type: number
+    description: 'Relative humidity inside of the sensor housing (%). Null if not equipped'
+  - name: temperature
+    type: number
+    description: 'Temperature inside of the sensor housing (F). Null if not equipped'
+  - name: pressure
+    type: number
+    description: 'Current pressure in Millibars'
+  - name: pm1.0_a
+    type: number
+    description: 'Estimated mass concentration PM1 (µg/m³).  PM1 are extremely fine particulates with a diameter of fewer than 1 microns. Channel A.'
+  - name: pm1.0_b
+    type: number
+    description: 'Estimated mass concentration PM1 (µg/m³).  PM1 are extremely fine particulates with a diameter of fewer than 1 microns. Channel B.'
+  - name: pm2.5_a
+    type: number
+    description: 'Estimated mass concentration PM2.5 (µg/m³). PM2.5 are fine particulates with a diameter of fewer than 2.5 microns. Channel A.'
+  - name: pm2.5_b
+    type: number
+    description: 'Estimated mass concentration PM2.5 (µg/m³). PM2.5 are fine particulates with a diameter of fewer than 2.5 microns. Channel B.'
+primaryKey:
+  - sensor_index
+  - last_seen
+missingValues:
+  - ''
