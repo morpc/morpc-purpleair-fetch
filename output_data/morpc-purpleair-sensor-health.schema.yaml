@@ -1,0 +1,46 @@
+fields:
+  - name: sensor_index
+    type: integer
+    description: 'The sensors index. Can be used to add a sensor to a group or view its details. Assigned by PA after registration of sensor.'
+  - name: last_modified
+    type: datetime
+    description: 'The UNIX time stamp from the last time the device was modified by the registration form'
+  - name: last_seen
+    type: datetime
+    description: 'The UNIX time stamp of the last time the server received data from the device'
+  - name: name
+    type: string
+    description: 'Name of the sensor. Given at time of registration. Should not change throughout the life of the sensor.'
+  - name: firmware_version
+    type: string
+    description: 'The last known firmware version on the device'
+  - name: firmware_upgrade
+    type: string
+    description: 'If an update is available, the firmware version that will be installed on the device'
+  - name: rssi
+    type: integer
+    description: 'The WiFi signal strength'
+  - name: uptime
+    type: integer
+    description: 'The time in minutes since the firmware started as last reported by the sensor.'
+  - name: pa_latency
+    type: integer
+    description: 'The time taken to send data to the PurpleAir servers in milliseconds'
+  - name: memory
+    type: integer
+    description: 'Free HEAP memory in Kb.'
+  - name: channel_state
+    type: integer
+    description: 'Flags indicating the state of the channels. 0 = "No PM" 1 = "PM-A", 2 = "PM-B", 3 = "PM-A+PM-B"'
+  - name: datetime_check
+    type: datetime
+    description: 'The UTC date time of the health check. Derived from data_time_stamp field from the query response'
+  - name: status
+    type: string
+    description: 'Not yet implemented. Will assign value based on table values. Possible values are good, maybe, bad.'
+missingValues:
+  - ''
+primaryKey:
+  - sensor_index
+  - datetime_check
+  
