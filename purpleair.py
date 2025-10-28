@@ -2,9 +2,7 @@
 from datetime import date
 import logging
 
-from click import group
-from matplotlib.pylab import det
-
+# Set up logger. 
 logging.basicConfig(level=logging.DEBUG,
                     force=True,
                     format='%(asctime)s | %(levelname)s | %(name)s.%(funcName)s : %(message)s'
@@ -32,6 +30,21 @@ write_header = {
 GROUPS_URL = 'https://api.purpleair.com/v1/groups'
 SENSORS_URL = 'https://api.purpleair.com/v1/sensors'
 ORG_URL = 'https://api.purpleair.com/v1/organization'
+
+DATA_FIELDS = [
+        'humidity',
+        'temperature', 
+        'pressure', 
+        'pm1.0_atm_a', 'pm1.0_atm_b', 'pm1.0_cf_1_a', 'pm1.0_cf_1_b',
+        'pm2.5_alt_a', 'pm2.5_alt_b',  'pm2.5_atm_a', 'pm2.5_atm_b', 'pm2.5_cf_1_a', 'pm2.5_cf_1_b',
+        'pm10.0_atm_a', 'pm10.0_atm_b', 'pm10.0_cf_1_a', 'pm10.0_cf_1_b',
+        '0.3_um_count', '0.5_um_count', '1.0_um_count', '2.5_um_count', '5.0_um_count', '10.0_um_count', 
+        ]
+
+DATA_FIELDS_QUERY = [f"{x}|d3" for x in DATA_FIELDS] # Assign the number of decimals to return for pm data
+
+
+
 
 def get_json_safely(url, headers, params=None):
     import requests
@@ -248,25 +261,24 @@ def get_members_health(group_id):
     return df
 
 def get_members_data(group_id):
-    import requests
     import pandas as pd
     import datetime
     logger.info(f"Getting most recent data reading for all members in group {group_id}")
 
-    fields = ['name', 'last_seen', 'pm2.5_a', 'pm2.5_b', 'pm1.0_a', 'pm1.0_b', 'humidity', 'temperature', 'pressure']
-
     params = {
-        'fields': ",".join(fields)
+        'fields': ",".join(DATA_FIELDS_QUERY + ['last_seen'])
     }
 
     json = get_json_safely(f"{GROUPS_URL}/{group_id}/members", headers=read_header, params=params)
 
     df = pd.DataFrame([x for x in json['data']], columns=json['fields'])
-    df['last_seen'] = [datetime.datetime.fromtimestamp(x, datetime.timezone.utc) for x in df['last_seen']]
+    df.columns = [x.replace('|d3','') if x.endswith('|d3') else x for x in df.columns]
+    df['time_stamp'] = [datetime.datetime.fromtimestamp(x, datetime.timezone.utc) for x in df['last_seen']]
+    df = df[['sensor_index', 'time_stamp'] + [col for col in DATA_FIELDS if col not in ['time_stamp', 'sensor_index']]]
 
     return df
 
-def get_member_history(group_id, member_id, start=None, end=None, average=0):
+def get_member_history(group_id, member_id, start=None, end=None, average=0, by_sensor_index=True):
     """
     Retrieves historical data from the purple API for a given member of a group. 
 
@@ -301,30 +313,23 @@ def get_member_history(group_id, member_id, start=None, end=None, average=0):
                 10080 (1-week)	    5 years
                 43200 (1-month)	    20 years
                 525600 (1-year) 	100 years
+    
+    by_sensor_index : bool
+        If True, converts the memeber id to a sensor id and drop member id and group columns. 
+        If False, maintains member and group ids to convert later. See get_members_history.
 
     Returns:
     --------
     pandas.Dataframe
         A pandas dataframe with all the sensor readings for the sensor by member_id
     """
-    import requests
+
     import pandas as pd
     import datetime
     logger.info(f"Getting data for sensor with member id {member_id} between {start} and {end}, readings averaged every {average} minutes.")
 
-    fields = [
-        'humidity',
-        'temperature', 
-        'pressure', 
-        'pm1.0_atm_a', 'pm1.0_atm_b', 'pm1.0_cf_1_a', 'pm1.0_cf_1_b',
-        'pm2.5_alt_a', 'pm2.5_alt_b',  'pm2.5_atm_a', 'pm2.5_atm_b', 'pm2.5_cf_1_a', 'pm2.5_cf_1_b',
-        'pm10.0_atm_a', 'pm10.0_atm_b', 'pm10.0_cf_1_a', 'pm10.0_cf_1_b'
-        ]
-
-    fields = [f"{x}|d3" if x.startswith('pm') else x for x in fields] # Assign the number of decimals to return for pm data
-
     params = {
-        'fields': ",".join(fields),
+        'fields': ",".join(DATA_FIELDS_QUERY),
         'average': average
     }
 
@@ -354,16 +359,18 @@ def get_member_history(group_id, member_id, start=None, end=None, average=0):
 
     json = get_json_safely(f"{GROUPS_URL}/{group_id}/members/{member_id}/history", headers=read_header, params=params)
 
-    details = get_group_details(group_id)
-    id_map = {}
-    [id_map.update({x: y}) for x,y,z in [sensor.values() for sensor in details['members']]]
-
     df = pd.DataFrame([x for x in json['data']], columns=json['fields'])
+    df.columns = [x.replace('|d3','') if x.endswith('|d3') else x for x in df.columns]
     df['member_id'] = member_id
-    df['sensor_index'] = df['member_id'].map(id_map)
-
+    df['group_id'] = group_id
     df['time_stamp'] = [datetime.datetime.fromtimestamp(x, datetime.timezone.utc) for x in df['time_stamp']]
-    df = df[['member_id', 'sensor_index', 'time_stamp'] + [col for col in df.columns if col not in ['member_id', 'time_stamp', 'sensor_index']]]
+
+    if by_sensor_index:
+        df['sensor_index'] = sensorid_from_memberid(group_id=group_id, member_ids=df['member_id'])
+        df = df[['sensor_index', 'time_stamp'] + [col for col in DATA_FIELDS if col not in ['time_stamp', 'sensor_index']]]
+
+    else: 
+        df = df[['member_id', 'group_id', 'time_stamp'] + [col for col in DATA_FIELDS if col not in ['member_id', 'group_id', 'time_stamp']]]
 
     return df
 
@@ -376,12 +383,20 @@ def get_members_history(group_id, start, end, average=0):
     [id_map.update({x: y}) for x,y,z in [sensor.values() for sensor in details['members']]]
     logger.info(f"Getting data between {start} and {end} for all {len(members)} members of group {group_id}.")
 
-    data = []
+    df = []
     for member in members:
-        member_data = get_member_history(member)
-        data.append(member_data)
+        member_data = get_member_history(member, sensor_index=False)
+        df.append(member_data)
 
-    data = pd.concat(data)
+    df = pd.concat(df)
+    df['sensor_id'] = sensorid_from_memberid(group_id, df['member_id'])
+    df = df[['sensor_index', 'time_stamp'] + [col for col in DATA_FIELDS if col not in ['time_stamp', 'sensor_index']]]
 
-    return data
+    return df
     
+def sensorid_from_memberid(group_id, member_ids):
+    details = get_group_details(group_id)
+    id_map = {}
+    [id_map.update({x: y}) for x,y,z in [sensor.values() for sensor in details['members']]]
+    
+    return member_ids.map(id_map)
