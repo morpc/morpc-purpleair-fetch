@@ -1,117 +1,17 @@
-2025-10-23 14:41:34,872 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): api.purpleair.com:443
-2025-10-23 14:41:35,175 | DEBUG | urllib3.connectionpool : https://api.purpleair.com:443 "GET /v1/groups/2758 HTTP/1.1" 200 None
-2025-10-23 14:41:35,176 | DEBUG | purpleair : url: https://api.purpleair.com/v1/groups/2758 headers: {'content-type': 'application/json', 'vary': 'Accept-Encoding', 'access-control-allow-origin': '*', 'content-encoding': 'gzip', 'x-cloud-trace-context': 'f4a798bf18bebbe8d1d8cc3f613be5c4', 'date': 'Thu, 23 Oct 2025 18:41:35 GMT', 'server': 'Google Frontend', 'Transfer-Encoding': 'chunked'}
-2025-10-23 14:43:09,577 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): api.purpleair.com:443
-2025-10-23 14:43:09,780 | DEBUG | urllib3.connectionpool : https://api.purpleair.com:443 "GET /v1/groups/2758/members/280453/history?fields=name%2Clast_seen%2Cpm2.5_a%2Cpm2.5_b%2Cpm1.0_a%2Cpm1.0_b%2Chumidity_a%2Chumidity_b%2Ctemperature_a%2Ctemperature_b%2Cpressure_a%2Cpressure_b&average=0&start_timestamp=2025-10-22&end_timestamp=2025-10-22 HTTP/1.1" 400 179
-2025-10-23 14:43:09,780 | DEBUG | purpleair : url: https://api.purpleair.com/v1/groups/2758/members/280453/history?fields=name%2Clast_seen%2Cpm2.5_a%2Cpm2.5_b%2Cpm1.0_a%2Cpm1.0_b%2Chumidity_a%2Chumidity_b%2Ctemperature_a%2Ctemperature_b%2Cpressure_a%2Cpressure_b&average=0&start_timestamp=2025-10-22&end_timestamp=2025-10-22 headers: {'content-type': 'application/json', 'vary': 'Accept-Encoding', 'access-control-allow-origin': '*', 'x-cloud-trace-context': 'af37867e816baeaaa6cf10af01baaf4e', 'date': 'Thu, 23 Oct 2025 18:43:09 GMT', 'server': 'Google Frontend', 'Content-Length': '179'}
-2025-10-23 14:43:09,781 | ERROR | purpleair : Unsuccessful GET response code: 400 from https://api.purpleair.com/v1/groups/2758/members/280453/history?fields=name%2Clast_seen%2Cpm2.5_a%2Cpm2.5_b%2Cpm1.0_a%2Cpm1.0_b%2Chumidity_a%2Chumidity_b%2Ctemperature_a%2Ctemperature_b%2Cpressure_a%2Cpressure_b&average=0&start_timestamp=2025-10-22&end_timestamp=2025-10-22
-2025-10-24 09:36:23,713 | DEBUG | purpleair : Reading deployment log from ./Air Quality Sensor Tracking_original.xlsx, sheet_name Deployment Log
-2025-10-24 09:36:24,068 | DEBUG | purpleair : 51 Sensors: 118637, 149764, 33861, 140106, 147240, 131379, 135368, 140562, 158823, 262123, 262109, 262107, 262121, 262105, 157587, 215583, 215585, 215587, 281484, 215599, 215601, 215605, 221315, 221317, 221319, 221321, 221323, 221325, 221327, 221329, 221331, 221333, 221335, 221337, 280754, 221341, 221343, 221345, 221347, 221349, 221351, 221353, 233849, 233851, 233853, 233855, 233857, 233859, 233861, 233863, 233865
-2025-10-24 09:36:41,984 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): api.purpleair.com:443
-2025-10-24 09:36:43,316 | DEBUG | urllib3.connectionpool : https://api.purpleair.com:443 "GET /v1/organization HTTP/1.1" 200 None
-2025-10-24 09:36:56,998 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): api.purpleair.com:443
-2025-10-24 09:36:57,402 | DEBUG | urllib3.connectionpool : https://api.purpleair.com:443 "GET /v1/groups HTTP/1.1" 200 None
-2025-10-24 09:36:57,403 | DEBUG | purpleair : url: https://api.purpleair.com/v1/groups headers: {'content-type': 'application/json', 'vary': 'Accept-Encoding', 'access-control-allow-origin': '*', 'content-encoding': 'gzip', 'x-cloud-trace-context': '6693dc048e494e3303f683686570ae36', 'date': 'Fri, 24 Oct 2025 13:36:57 GMT', 'server': 'Google Frontend', 'Transfer-Encoding': 'chunked'}
-2025-10-24 10:00:27,663 | DEBUG | purpleair : Reading deployment log from ./Air Quality Sensor Tracking_original.xlsx, sheet_name Deployment Log
-2025-10-24 10:00:27,908 | DEBUG | purpleair : 51 Sensors: 118637, 149764, 33861, 140106, 147240, 131379, 135368, 140562, 158823, 262123, 262109, 262107, 262121, 262105, 157587, 215583, 215585, 215587, 281484, 215599, 215601, 215605, 221315, 221317, 221319, 221321, 221323, 221325, 221327, 221329, 221331, 221333, 221335, 221337, 280754, 221341, 221343, 221345, 221347, 221349, 221351, 221353, 233849, 233851, 233853, 233855, 233857, 233859, 233861, 233863, 233865
-2025-10-24 10:00:30,238 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): api.purpleair.com:443
-2025-10-24 10:00:31,942 | DEBUG | urllib3.connectionpool : https://api.purpleair.com:443 "GET /v1/organization HTTP/1.1" 200 None
-2025-10-24 10:01:28,446 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): api.purpleair.com:443
-2025-10-24 10:01:29,907 | DEBUG | urllib3.connectionpool : https://api.purpleair.com:443 "GET /v1/organization HTTP/1.1" 200 None
-2025-10-24 13:45:52,881 | DEBUG | purpleair : Reading deployment log from ./Air Quality Sensor Tracking_original.xlsx, sheet_name Deployment Log
-2025-10-24 13:45:53,157 | DEBUG | purpleair : 51 Sensors: 118637, 149764, 33861, 140106, 147240, 131379, 135368, 140562, 158823, 262123, 262109, 262107, 262121, 262105, 157587, 215583, 215585, 215587, 281484, 215599, 215601, 215605, 221315, 221317, 221319, 221321, 221323, 221325, 221327, 221329, 221331, 221333, 221335, 221337, 280754, 221341, 221343, 221345, 221347, 221349, 221351, 221353, 233849, 233851, 233853, 233855, 233857, 233859, 233861, 233863, 233865
-2025-10-24 13:45:54,691 | INFO | purpleair : Getting organization data form PurpleAir API.
-2025-10-24 13:45:54,812 | INFO | purpleair : Getting data from https://api.purpleair.com/v1/organization with parameters None.
-2025-10-24 13:45:54,814 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): api.purpleair.com:443
-2025-10-24 13:45:56,416 | DEBUG | urllib3.connectionpool : https://api.purpleair.com:443 "GET /v1/organization HTTP/1.1" 200 None
-2025-10-24 13:45:56,499 | DEBUG | purpleair : Request successful. Decoding return JSON.
-2025-10-24 13:46:00,004 | INFO | purpleair : Getting list of all groups in PurpleAir API.
-2025-10-24 13:46:00,005 | INFO | purpleair : Getting data from https://api.purpleair.com/v1/groups with parameters None.
-2025-10-24 13:46:00,008 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): api.purpleair.com:443
-2025-10-24 13:46:00,335 | DEBUG | urllib3.connectionpool : https://api.purpleair.com:443 "GET /v1/groups HTTP/1.1" 200 None
-2025-10-24 13:46:00,418 | DEBUG | purpleair : Request successful. Decoding return JSON.
-2025-10-24 13:46:23,118 | INFO | purpleair : Getting group details for group id: 2758
-2025-10-24 13:47:32,405 | DEBUG | purpleair : Reading deployment log from ./Air Quality Sensor Tracking_original.xlsx, sheet_name Deployment Log
-2025-10-24 13:47:32,594 | DEBUG | purpleair : 51 Sensors: 118637, 149764, 33861, 140106, 147240, 131379, 135368, 140562, 158823, 262123, 262109, 262107, 262121, 262105, 157587, 215583, 215585, 215587, 281484, 215599, 215601, 215605, 221315, 221317, 221319, 221321, 221323, 221325, 221327, 221329, 221331, 221333, 221335, 221337, 280754, 221341, 221343, 221345, 221347, 221349, 221351, 221353, 233849, 233851, 233853, 233855, 233857, 233859, 233861, 233863, 233865
-2025-10-24 13:47:33,600 | INFO | purpleair : Getting organization data form PurpleAir API.
-2025-10-24 13:47:33,678 | INFO | purpleair : Getting data from https://api.purpleair.com/v1/organization with parameters None.
-2025-10-24 13:47:33,681 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): api.purpleair.com:443
-2025-10-24 13:47:35,131 | DEBUG | urllib3.connectionpool : https://api.purpleair.com:443 "GET /v1/organization HTTP/1.1" 200 None
-2025-10-24 13:47:35,214 | DEBUG | purpleair : Request successful. Decoding return JSON.
-2025-10-24 13:47:36,297 | INFO | purpleair : Getting list of all groups in PurpleAir API.
-2025-10-24 13:47:36,299 | INFO | purpleair : Getting data from https://api.purpleair.com/v1/groups with parameters None.
-2025-10-24 13:47:36,302 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): api.purpleair.com:443
-2025-10-24 13:47:36,577 | DEBUG | urllib3.connectionpool : https://api.purpleair.com:443 "GET /v1/groups HTTP/1.1" 200 None
-2025-10-24 13:47:36,660 | DEBUG | purpleair : Request successful. Decoding return JSON.
-2025-10-24 13:47:41,755 | INFO | purpleair : Getting group details for group id: 2758
-2025-10-24 13:48:46,951 | DEBUG | purpleair : Reading deployment log from ./Air Quality Sensor Tracking_original.xlsx, sheet_name Deployment Log
-2025-10-24 13:48:47,132 | DEBUG | purpleair : 51 Sensors: 118637, 149764, 33861, 140106, 147240, 131379, 135368, 140562, 158823, 262123, 262109, 262107, 262121, 262105, 157587, 215583, 215585, 215587, 281484, 215599, 215601, 215605, 221315, 221317, 221319, 221321, 221323, 221325, 221327, 221329, 221331, 221333, 221335, 221337, 280754, 221341, 221343, 221345, 221347, 221349, 221351, 221353, 233849, 233851, 233853, 233855, 233857, 233859, 233861, 233863, 233865
-2025-10-24 13:48:48,100 | INFO | purpleair : Getting organization data form PurpleAir API.
-2025-10-24 13:48:48,169 | INFO | purpleair : Getting data from https://api.purpleair.com/v1/organization with parameters None.
-2025-10-24 13:48:48,171 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): api.purpleair.com:443
-2025-10-24 13:48:49,568 | DEBUG | urllib3.connectionpool : https://api.purpleair.com:443 "GET /v1/organization HTTP/1.1" 200 None
-2025-10-24 13:48:49,652 | DEBUG | purpleair : Request successful. Decoding return JSON.
-2025-10-24 13:48:50,887 | INFO | purpleair : Getting list of all groups in PurpleAir API.
-2025-10-24 13:48:50,889 | INFO | purpleair : Getting data from https://api.purpleair.com/v1/groups with parameters None.
-2025-10-24 13:48:50,892 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): api.purpleair.com:443
-2025-10-24 13:48:51,521 | DEBUG | urllib3.connectionpool : https://api.purpleair.com:443 "GET /v1/groups HTTP/1.1" 200 None
-2025-10-24 13:48:51,604 | DEBUG | purpleair : Request successful. Decoding return JSON.
-2025-10-24 13:48:53,736 | INFO | purpleair : Getting group details for group id: 2758
-2025-10-24 13:48:53,738 | INFO | purpleair : Getting data from https://api.purpleair.com/v1/groups/2758 with parameters None.
-2025-10-24 13:48:53,740 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): api.purpleair.com:443
-2025-10-24 13:48:54,054 | DEBUG | urllib3.connectionpool : https://api.purpleair.com:443 "GET /v1/groups/2758 HTTP/1.1" 200 None
-2025-10-24 13:48:54,138 | DEBUG | purpleair : Request successful. Decoding return JSON.
-2025-10-24 13:48:59,241 | INFO | purpleair : Getting group details for group id: 2758
-2025-10-24 13:48:59,243 | INFO | purpleair : Getting data from https://api.purpleair.com/v1/groups/2758 with parameters None.
-2025-10-24 13:48:59,245 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): api.purpleair.com:443
-2025-10-24 13:48:59,513 | DEBUG | urllib3.connectionpool : https://api.purpleair.com:443 "GET /v1/groups/2758 HTTP/1.1" 200 None
-2025-10-24 13:48:59,597 | DEBUG | purpleair : Request successful. Decoding return JSON.
-2025-10-24 13:48:59,599 | INFO | purpleair : Comparing 51 sensors and in PurpleAir API group 2758
-2025-10-24 13:48:59,601 | INFO | purpleair : 0 sensor to add and 0 to remove.
-2025-10-24 13:49:01,054 | INFO | purpleair : Updating sensor group 2758
-2025-10-24 13:49:01,056 | DEBUG | purpleair : No sensors to add.
-2025-10-24 13:49:01,056 | DEBUG | purpleair : No sensors to remove.
-2025-10-24 13:49:01,057 | INFO | purpleair : Group 2758 is up to date as of 2025-10-24 13:49:01.057394.
-2025-10-24 13:49:06,886 | INFO | purpleair : Getting sensor metadata for group 2758
-2025-10-24 13:49:06,888 | INFO | purpleair : Getting data from https://api.purpleair.com/v1/groups/2758/members with parameters {'fields': 'name,model,hardware,date_created,location_type,latitude,longitude,altitude'}.
-2025-10-24 13:49:06,890 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): api.purpleair.com:443
-2025-10-24 13:49:07,333 | DEBUG | urllib3.connectionpool : https://api.purpleair.com:443 "GET /v1/groups/2758/members?fields=name%2Cmodel%2Chardware%2Cdate_created%2Clocation_type%2Clatitude%2Clongitude%2Caltitude HTTP/1.1" 200 None
-2025-10-24 13:49:07,334 | DEBUG | purpleair : Request successful. Decoding return JSON.
-2025-10-24 13:49:48,729 | INFO | purpleair : Getting most recent data reading for all members in group 2758
-2025-10-24 13:49:48,730 | INFO | purpleair : Getting data from https://api.purpleair.com/v1/groups/2758/members with parameters {'fields': 'name,last_seen,pm2.5_a,pm2.5_b,pm1.0_a,pm1.0_b,humidity,temperature,pressure'}.
-2025-10-24 13:49:48,732 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): api.purpleair.com:443
-2025-10-24 13:49:49,214 | DEBUG | urllib3.connectionpool : https://api.purpleair.com:443 "GET /v1/groups/2758/members?fields=name%2Clast_seen%2Cpm2.5_a%2Cpm2.5_b%2Cpm1.0_a%2Cpm1.0_b%2Chumidity%2Ctemperature%2Cpressure HTTP/1.1" 200 None
-2025-10-24 13:49:49,216 | DEBUG | purpleair : Request successful. Decoding return JSON.
-2025-10-24 14:03:36,182 | INFO | purpleair : Getting data for sensor with member id 280453 between 2025-10-22 and 2025-10-23, readings averaged every 0 minutes.
-2025-10-24 14:03:36,183 | DEBUG | purpleair : Converting 2025-10-22 to date.
-2025-10-24 14:03:36,197 | DEBUG | purpleair : Converting 2025-10-23 to date.
-2025-10-24 14:03:36,199 | INFO | purpleair : Getting data from https://api.purpleair.com/v1/groups/2758/members/280453/history with parameters {'fields': 'humidity,temperature,pressure,pm1.0_atm_a|d3,pm1.0_atm_b|d3,pm1.0_cf_1_a|d3,pm1.0_cf_1_b|d3,pm2.5_alt_a|d3,pm2.5_alt_b|d3,pm2.5_atm_a|d3,pm2.5_atm_b|d3,pm2.5_cf_1_a|d3,pm2.5_cf_1_b|d3,pm10.0_atm_a|d3,pm10.0_atm_b|d3,pm10.0_cf_1_a|d3,pm10.0_cf_1_b|d3', 'average': 0, 'start_timestamp': '1761105600', 'end_timestamp': '1761192000'}.
-2025-10-24 14:03:36,203 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): api.purpleair.com:443
-2025-10-24 14:03:37,114 | DEBUG | urllib3.connectionpool : https://api.purpleair.com:443 "GET /v1/groups/2758/members/280453/history?fields=humidity%2Ctemperature%2Cpressure%2Cpm1.0_atm_a%7Cd3%2Cpm1.0_atm_b%7Cd3%2Cpm1.0_cf_1_a%7Cd3%2Cpm1.0_cf_1_b%7Cd3%2Cpm2.5_alt_a%7Cd3%2Cpm2.5_alt_b%7Cd3%2Cpm2.5_atm_a%7Cd3%2Cpm2.5_atm_b%7Cd3%2Cpm2.5_cf_1_a%7Cd3%2Cpm2.5_cf_1_b%7Cd3%2Cpm10.0_atm_a%7Cd3%2Cpm10.0_atm_b%7Cd3%2Cpm10.0_cf_1_a%7Cd3%2Cpm10.0_cf_1_b%7Cd3&average=0&start_timestamp=1761105600&end_timestamp=1761192000 HTTP/1.1" 200 None
-2025-10-24 14:03:37,163 | DEBUG | purpleair : Request successful. Decoding return JSON.
-2025-10-24 14:04:04,202 | INFO | purpleair : Getting data for sensor with member id 280453 between 2025-10-22 and 2025-10-23, readings averaged every 0 minutes.
-2025-10-24 14:04:04,203 | DEBUG | purpleair : Converting 2025-10-22 to date.
-2025-10-24 14:04:04,205 | DEBUG | purpleair : Converting 2025-10-23 to date.
-2025-10-24 14:04:04,207 | INFO | purpleair : Getting data from https://api.purpleair.com/v1/groups/2758/members/280453/history with parameters {'fields': 'humidity,temperature,pressure,pm1.0_atm_a|d3,pm1.0_atm_b|d3,pm1.0_cf_1_a|d3,pm1.0_cf_1_b|d3,pm2.5_alt_a|d3,pm2.5_alt_b|d3,pm2.5_atm_a|d3,pm2.5_atm_b|d3,pm2.5_cf_1_a|d3,pm2.5_cf_1_b|d3,pm10.0_atm_a|d3,pm10.0_atm_b|d3,pm10.0_cf_1_a|d3,pm10.0_cf_1_b|d3', 'average': 0, 'start_timestamp': '1761105600', 'end_timestamp': '1761192000'}.
-2025-10-24 14:04:04,210 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): api.purpleair.com:443
-2025-10-24 14:04:04,933 | DEBUG | urllib3.connectionpool : https://api.purpleair.com:443 "GET /v1/groups/2758/members/280453/history?fields=humidity%2Ctemperature%2Cpressure%2Cpm1.0_atm_a%7Cd3%2Cpm1.0_atm_b%7Cd3%2Cpm1.0_cf_1_a%7Cd3%2Cpm1.0_cf_1_b%7Cd3%2Cpm2.5_alt_a%7Cd3%2Cpm2.5_alt_b%7Cd3%2Cpm2.5_atm_a%7Cd3%2Cpm2.5_atm_b%7Cd3%2Cpm2.5_cf_1_a%7Cd3%2Cpm2.5_cf_1_b%7Cd3%2Cpm10.0_atm_a%7Cd3%2Cpm10.0_atm_b%7Cd3%2Cpm10.0_cf_1_a%7Cd3%2Cpm10.0_cf_1_b%7Cd3&average=0&start_timestamp=1761105600&end_timestamp=1761192000 HTTP/1.1" 200 None
-2025-10-24 14:04:04,978 | DEBUG | purpleair : Request successful. Decoding return JSON.
-2025-10-24 14:04:36,187 | INFO | purpleair : Getting data for sensor with member id 280453 between 2025-10-22 and 2025-10-23, readings averaged every 0 minutes.
-2025-10-24 14:04:36,188 | DEBUG | purpleair : Converting 2025-10-22 to date.
-2025-10-24 14:04:36,189 | DEBUG | purpleair : Converting 2025-10-23 to date.
-2025-10-24 14:04:36,191 | INFO | purpleair : Getting data from https://api.purpleair.com/v1/groups/2758/members/280453/history with parameters {'fields': 'humidity,temperature,pressure,pm1.0_atm_a|d3,pm1.0_atm_b|d3,pm1.0_cf_1_a|d3,pm1.0_cf_1_b|d3,pm2.5_alt_a|d3,pm2.5_alt_b|d3,pm2.5_atm_a|d3,pm2.5_atm_b|d3,pm2.5_cf_1_a|d3,pm2.5_cf_1_b|d3,pm10.0_atm_a|d3,pm10.0_atm_b|d3,pm10.0_cf_1_a|d3,pm10.0_cf_1_b|d3', 'average': 0, 'start_timestamp': '1761105600', 'end_timestamp': '1761192000'}.
-2025-10-24 14:04:36,194 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): api.purpleair.com:443
-2025-10-24 14:04:37,292 | DEBUG | urllib3.connectionpool : https://api.purpleair.com:443 "GET /v1/groups/2758/members/280453/history?fields=humidity%2Ctemperature%2Cpressure%2Cpm1.0_atm_a%7Cd3%2Cpm1.0_atm_b%7Cd3%2Cpm1.0_cf_1_a%7Cd3%2Cpm1.0_cf_1_b%7Cd3%2Cpm2.5_alt_a%7Cd3%2Cpm2.5_alt_b%7Cd3%2Cpm2.5_atm_a%7Cd3%2Cpm2.5_atm_b%7Cd3%2Cpm2.5_cf_1_a%7Cd3%2Cpm2.5_cf_1_b%7Cd3%2Cpm10.0_atm_a%7Cd3%2Cpm10.0_atm_b%7Cd3%2Cpm10.0_cf_1_a%7Cd3%2Cpm10.0_cf_1_b%7Cd3&average=0&start_timestamp=1761105600&end_timestamp=1761192000 HTTP/1.1" 200 None
-2025-10-24 14:04:37,295 | DEBUG | purpleair : Request successful. Decoding return JSON.
-2025-10-24 14:09:18,256 | INFO | purpleair : Getting data for sensor with member id 280453 between 2025-10-22 and 2025-10-23, readings averaged every 0 minutes.
-2025-10-24 14:09:18,257 | DEBUG | purpleair : Converting 2025-10-22 to date.
-2025-10-24 14:09:18,259 | DEBUG | purpleair : Converting 2025-10-23 to date.
-2025-10-24 14:09:18,260 | INFO | purpleair : Getting data from https://api.purpleair.com/v1/groups/2758/members/280453/history with parameters {'fields': 'humidity,temperature,pressure,pm1.0_atm_a|d3,pm1.0_atm_b|d3,pm1.0_cf_1_a|d3,pm1.0_cf_1_b|d3,pm2.5_alt_a|d3,pm2.5_alt_b|d3,pm2.5_atm_a|d3,pm2.5_atm_b|d3,pm2.5_cf_1_a|d3,pm2.5_cf_1_b|d3,pm10.0_atm_a|d3,pm10.0_atm_b|d3,pm10.0_cf_1_a|d3,pm10.0_cf_1_b|d3', 'average': 0, 'start_timestamp': '1761105600', 'end_timestamp': '1761192000'}.
-2025-10-24 14:09:18,263 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): api.purpleair.com:443
-2025-10-24 14:09:19,302 | DEBUG | urllib3.connectionpool : https://api.purpleair.com:443 "GET /v1/groups/2758/members/280453/history?fields=humidity%2Ctemperature%2Cpressure%2Cpm1.0_atm_a%7Cd3%2Cpm1.0_atm_b%7Cd3%2Cpm1.0_cf_1_a%7Cd3%2Cpm1.0_cf_1_b%7Cd3%2Cpm2.5_alt_a%7Cd3%2Cpm2.5_alt_b%7Cd3%2Cpm2.5_atm_a%7Cd3%2Cpm2.5_atm_b%7Cd3%2Cpm2.5_cf_1_a%7Cd3%2Cpm2.5_cf_1_b%7Cd3%2Cpm10.0_atm_a%7Cd3%2Cpm10.0_atm_b%7Cd3%2Cpm10.0_cf_1_a%7Cd3%2Cpm10.0_cf_1_b%7Cd3&average=0&start_timestamp=1761105600&end_timestamp=1761192000 HTTP/1.1" 200 None
-2025-10-24 14:09:19,345 | DEBUG | purpleair : Request successful. Decoding return JSON.
-2025-10-24 14:09:19,425 | INFO | purpleair : Getting group details for group id: 2758
-2025-10-24 14:09:19,426 | INFO | purpleair : Getting data from https://api.purpleair.com/v1/groups/2758 with parameters None.
-2025-10-24 14:09:19,428 | DEBUG | urllib3.connectionpool : Starting new HTTPS connection (1): api.purpleair.com:443
-2025-10-24 14:09:19,721 | DEBUG | urllib3.connectionpool : https://api.purpleair.com:443 "GET /v1/groups/2758 HTTP/1.1" 200 None
-2025-10-24 14:09:19,804 | DEBUG | purpleair : Request successful. Decoding return JSON.
+2025-10-28 11:38:03,732 | INFO | purpleair.get_members_data : Getting most recent data reading for all members in group 2758
+2025-10-28 11:38:03,785 | INFO | purpleair.get_json_safely : Getting data from https://api.purpleair.com/v1/groups/2758/members with parameters {'fields': 'humidity|d3,temperature|d3,pressure|d3,pm1.0_atm_a|d3,pm1.0_atm_b|d3,pm1.0_cf_1_a|d3,pm1.0_cf_1_b|d3,pm2.5_alt_a|d3,pm2.5_alt_b|d3,pm2.5_atm_a|d3,pm2.5_atm_b|d3,pm2.5_cf_1_a|d3,pm2.5_cf_1_b|d3,pm10.0_atm_a|d3,pm10.0_atm_b|d3,pm10.0_cf_1_a|d3,pm10.0_cf_1_b|d3,0.3_um_count|d3,0.5_um_count|d3,1.0_um_count|d3,2.5_um_count|d3,5.0_um_count|d3,10.0_um_count|d3,last_seen'}.
+2025-10-28 11:38:03,788 | DEBUG | urllib3.connectionpool._new_conn : Starting new HTTPS connection (1): api.purpleair.com:443
+2025-10-28 11:38:04,154 | DEBUG | urllib3.connectionpool._make_request : https://api.purpleair.com:443 "GET /v1/groups/2758/members?fields=humidity%7Cd3%2Ctemperature%7Cd3%2Cpressure%7Cd3%2Cpm1.0_atm_a%7Cd3%2Cpm1.0_atm_b%7Cd3%2Cpm1.0_cf_1_a%7Cd3%2Cpm1.0_cf_1_b%7Cd3%2Cpm2.5_alt_a%7Cd3%2Cpm2.5_alt_b%7Cd3%2Cpm2.5_atm_a%7Cd3%2Cpm2.5_atm_b%7Cd3%2Cpm2.5_cf_1_a%7Cd3%2Cpm2.5_cf_1_b%7Cd3%2Cpm10.0_atm_a%7Cd3%2Cpm10.0_atm_b%7Cd3%2Cpm10.0_cf_1_a%7Cd3%2Cpm10.0_cf_1_b%7Cd3%2C0.3_um_count%7Cd3%2C0.5_um_count%7Cd3%2C1.0_um_count%7Cd3%2C2.5_um_count%7Cd3%2C5.0_um_count%7Cd3%2C10.0_um_count%7Cd3%2Clast_seen HTTP/1.1" 200 None
+2025-10-28 11:38:04,185 | DEBUG | purpleair.get_json_safely : Request successful. Decoding return JSON.
+2025-10-28 11:38:21,335 | INFO | purpleair.get_member_history : Getting data for sensor with member id 280453 between 2025-10-22 and 2025-10-23, readings averaged every 0 minutes.
+2025-10-28 11:38:21,337 | DEBUG | purpleair.get_member_history : Converting 2025-10-22 to date.
+2025-10-28 11:38:21,341 | DEBUG | purpleair.get_member_history : Converting 2025-10-23 to date.
+2025-10-28 11:38:21,344 | INFO | purpleair.get_json_safely : Getting data from https://api.purpleair.com/v1/groups/2758/members/280453/history with parameters {'fields': 'humidity|d3,temperature|d3,pressure|d3,pm1.0_atm_a|d3,pm1.0_atm_b|d3,pm1.0_cf_1_a|d3,pm1.0_cf_1_b|d3,pm2.5_alt_a|d3,pm2.5_alt_b|d3,pm2.5_atm_a|d3,pm2.5_atm_b|d3,pm2.5_cf_1_a|d3,pm2.5_cf_1_b|d3,pm10.0_atm_a|d3,pm10.0_atm_b|d3,pm10.0_cf_1_a|d3,pm10.0_cf_1_b|d3,0.3_um_count|d3,0.5_um_count|d3,1.0_um_count|d3,2.5_um_count|d3,5.0_um_count|d3,10.0_um_count|d3', 'average': 0, 'start_timestamp': '1761105600', 'end_timestamp': '1761192000'}.
+2025-10-28 11:38:21,349 | DEBUG | urllib3.connectionpool._new_conn : Starting new HTTPS connection (1): api.purpleair.com:443
+2025-10-28 11:38:22,998 | DEBUG | urllib3.connectionpool._make_request : https://api.purpleair.com:443 "GET /v1/groups/2758/members/280453/history?fields=humidity%7Cd3%2Ctemperature%7Cd3%2Cpressure%7Cd3%2Cpm1.0_atm_a%7Cd3%2Cpm1.0_atm_b%7Cd3%2Cpm1.0_cf_1_a%7Cd3%2Cpm1.0_cf_1_b%7Cd3%2Cpm2.5_alt_a%7Cd3%2Cpm2.5_alt_b%7Cd3%2Cpm2.5_atm_a%7Cd3%2Cpm2.5_atm_b%7Cd3%2Cpm2.5_cf_1_a%7Cd3%2Cpm2.5_cf_1_b%7Cd3%2Cpm10.0_atm_a%7Cd3%2Cpm10.0_atm_b%7Cd3%2Cpm10.0_cf_1_a%7Cd3%2Cpm10.0_cf_1_b%7Cd3%2C0.3_um_count%7Cd3%2C0.5_um_count%7Cd3%2C1.0_um_count%7Cd3%2C2.5_um_count%7Cd3%2C5.0_um_count%7Cd3%2C10.0_um_count%7Cd3&average=0&start_timestamp=1761105600&end_timestamp=1761192000 HTTP/1.1" 200 None
+2025-10-28 11:38:23,058 | DEBUG | purpleair.get_json_safely : Request successful. Decoding return JSON.
+2025-10-28 11:38:23,082 | INFO | purpleair.get_group_details : Getting group details for group id: 2758
+2025-10-28 11:38:23,083 | INFO | purpleair.get_json_safely : Getting data from https://api.purpleair.com/v1/groups/2758 with parameters None.
+2025-10-28 11:38:23,085 | DEBUG | urllib3.connectionpool._new_conn : Starting new HTTPS connection (1): api.purpleair.com:443
+2025-10-28 11:38:23,339 | DEBUG | urllib3.connectionpool._make_request : https://api.purpleair.com:443 "GET /v1/groups/2758 HTTP/1.1" 200 None
+2025-10-28 11:38:23,423 | DEBUG | purpleair.get_json_safely : Request successful. Decoding return JSON.
