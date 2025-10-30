@@ -2,6 +2,8 @@
 from datetime import date
 import logging
 
+from pandas import interval_range
+
 # Set up logger. 
 logging.basicConfig(level=logging.DEBUG,
                     force=True,
@@ -43,6 +45,17 @@ DATA_FIELDS = [
 
 DATA_FIELDS_QUERY = [f"{x}|d3" for x in DATA_FIELDS] # Assign the number of decimals to return for pm data
 
+AVERAGE_LIMITS = {
+    0: [30, 'days'],
+    10:	[60, 'days'],
+    30:	[90, 'days'],
+    60:	[180, 'days'],
+    360:	[1, 'year'],
+    1440:	[2, 'years'],
+    10080:	[5, 'years'],
+    43200:	[20, 'years'],
+    525600:	[100, 'years'],
+}
 
 
 
@@ -96,6 +109,57 @@ def delete_safely(url, headers, params=None):
         logger.debug(f"Delete successful.")
     r.close()
 
+def verify_interval(start, end = None):
+    import pandas as pd
+    import datetime
+    today = pd.to_datetime(datetime.datetime.today())
+    
+
+    if not isinstance(start, date):
+        logger.debug(f"Converting {start} to date.")
+        try:
+            start = pd.to_datetime(start, yearfirst=True)
+        except Exception as e:
+            logger.error(f'Start parameter must be a date or convertible by pd.to_datetime: {e}')
+            raise pd.errors.ParserError
+
+    if end != None:
+        if not isinstance(end, date):
+            logger.debug(f"Converting {end} to date.")
+            try:
+                end = pd.to_datetime(end, yearfirst=True)
+            except Exception as e:
+                logger.error(f'Start parameter must be a date or convertible by pd.to_datetime: {e}')
+                raise pd.errors.ParserError
+
+    elif end == None:
+        logger.debug(f"No end date provided. Using {today}")
+        end = today
+
+    logger.info(f'Creating interval for filtering deployments from {start} to {end}')
+    interval = pd.Interval(start, end)
+
+    return interval
+
+def check_interval(interval, average):
+    logger.debug(f"Checking if {interval} is longer than allowable length.")
+    freq = pd.Timedelta(value=AVERAGE_LIMITS[average][0], unit=AVERAGE_LIMITS[average][1])
+
+    if interval.length > freq:
+        interval_list = split_interval(interval=interval, average=freq)
+        logger.info(f"{interval} is longer than allowable {freq} returning list of {len(interval_list)} intervals")
+        return interval_list
+    else:
+        logger.info(f"{interval} is within the allowable {freq} returning freq.")
+        return interval
+
+def split_interval(interval, freq):
+    import pandas as pd
+
+    logger.info(f"Splitting {interval} by {freq}")
+    range = pd.interval_range(interval.left, interval.right, freq=freq).to_list()
+
+    return range
 
 def get_organization():
     logger.info(f"Getting organization data form PurpleAir API.")
@@ -104,7 +168,7 @@ def get_organization():
 
     return json
 
-def get_deployed_sensors(log_path, sheet_name):
+def get_deployed_sensors(log_path, start = None, end = None, sheet_name = "Deployment Log"):
     """
     Fetch list of sensor indexes.
 
@@ -123,12 +187,66 @@ def get_deployed_sensors(log_path, sheet_name):
     """
     import pandas as pd
     import math
+    import datetime
 
     logger.debug(f"Reading deployment log from {log_path}, sheet_name {sheet_name}")
+    today = pd.to_datetime(datetime.datetime.today())
+
     deployments = pd.read_excel(log_path, sheet_name=sheet_name).drop(0)
-    deployed = deployments.loc[(~deployments['Sensor ID Deployment'].str.endswith('00'))&(deployments['Deployment_End'].isna())]
+    deployments['Deployment_Start'] = [pd.to_datetime(x) for x in deployments['Deployment_Start']]
+    deployments['Deployment_End'] = [today if pd.isnull(x) else x for x in deployments['Deployment_End']]
+    deployments = deployments.loc[(~deployments['Sensor ID Deployment'].str.endswith('00'))]
+
+    logger.debug(f"converting deployment {start} and {end} to interval.")
+
+    deployments['Deployment_Period'] = [pd.Interval(x, y) for x, y in zip(deployments['Deployment_Start'], deployments['Deployment_End'])]
+
+    if (start == None) & (end == None):
+        logger.info(f"Getting all currently deployed sensors as of {today}.")
+        deployed = deployments.loc[(deployments['Deployment_End'] == today)]
+    
+    else:
+        if start != None:
+            if not isinstance(start, date):
+                logger.debug(f"Converting {start} to date.")
+                try:
+                    start = pd.to_datetime(start, yearfirst=True)
+                except Exception as e:
+                    logger.error(f'Start parameter must be a date or convertible by pd.to_datetime: {e}')
+                    raise pd.errors.ParserError
+            else:
+                logger.debug(f'Start date: {start}')
+
+        if end != None:
+            if not isinstance(end, date):
+                logger.debug(f"Converting {end} to date.")
+                try:
+                    end = pd.to_datetime(end, yearfirst=True)
+                except Exception as e:
+                    logger.error(f'Start parameter must be a date or convertible by pd.to_datetime: {e}')
+                    raise pd.errors.ParserError
+            else:
+                logger.debug(f"End date: {end}")
+
+        elif end == None:
+            logger.info(f"No end date provided. Using {today}")
+            end = today
+
+        logger.debug(f'Creating interval for filtering deployments from {start} to {end}')
+        interval = pd.Interval(start, end)
+            
+        logger.info(f'Getting all sensors deployed during {interval}')
+        deployed = []
+        for i, row in deployments.iterrows():
+            if row.Deployment_Period.overlaps(interval):
+                deployed.append(row)
+        deployed = pd.concat(deployed)
+        
+        if len(deployed) == 0:
+            logger.warning(f"Dates {start.strftime('%Y-%m-%d')} through {end.strftime('%Y-%m-%d')} return zero sensors. Check dates.")
+        
     sensor_index = [int(x) for x in deployed.Sensor_Index_ID if not math.isnan(x)]
-    logger.debug(f"{len(sensor_index)} Sensors: {", ".join([str(x) for x in sensor_index])}")
+    logger.info(f"{len(sensor_index)} Sensors: {", ".join([str(x) for x in sensor_index])}")
 
     return sensor_index
 
@@ -385,7 +503,7 @@ def get_members_history(group_id, start, end, average=0):
 
     df = []
     for member in members:
-        member_data = get_member_history(member, sensor_index=False)
+        member_data = get_member_history(member, sensor_index=False, average=average)
         df.append(member_data)
 
     df = pd.concat(df)
