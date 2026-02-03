@@ -2,15 +2,7 @@
 from datetime import date
 import logging
 
-from pandas import interval_range
-
-# Set up logger. 
-logging.basicConfig(level=logging.DEBUG,
-                    force=True,
-                    format='%(asctime)s | %(levelname)s | %(name)s.%(funcName)s : %(message)s'
-                    )
 logger = logging.getLogger(__name__)
-
 
 with open('.env') as env:
     lines = env.readlines()
@@ -56,8 +48,6 @@ AVERAGE_LIMITS = {
     43200:	[20, 'years'],
     525600:	[100, 'years'],
 }
-
-
 
 def get_json_safely(url, headers, params=None):
     import requests
@@ -142,6 +132,8 @@ def verify_interval(start, end = None):
     return interval
 
 def check_interval(interval, average):
+    import pandas as pd
+
     logger.debug(f"Checking if {interval} is longer than allowable length.")
     freq = pd.Timedelta(value=AVERAGE_LIMITS[average][0], unit=AVERAGE_LIMITS[average][1])
 
