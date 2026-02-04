@@ -1,93 +1,92 @@
-from sqlalchemy import Date, DateTime, Float, create_engine, ForeignKey, null
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlalchemy.event import listen
-from geoalchemy2 import Geometry, load_spatialite
-from typing import List, Optional
-from datetime import datetime, date
+from sqlalchemy import Boolean, Column, Date, Float, ForeignKey, String, Integer, create_engine
+from sqlalchemy.orm import relationship, sessionmaker, declarative_base
 
-# Create base class
-class Base(DeclarativeBase):
-    pass
+DB_URL = 'sqlite:///./test.db'
 
-class Sensor(Base):
-    __tablename__ = "sensor_table"
+engine = create_engine(DB_URL)
 
-    # Primary key
-    sensor_id: Mapped[int] = mapped_column(primary_key=True)
+SessionLocal = sessionmaker(bind=engine)
 
-    # Other columns for sensors
-    type: Mapped[str]
-    mac_addr: Mapped[str] # Potentially length limit
-    notes: Mapped[Optional[str]]
-    owner: Mapped[Optional[str]] # Potentially change to enum
+Base = declarative_base()
 
-    # Define relationships with deployments and locations
+class Registration(Base):
+    __tablename__ = 'registrations'
 
-    # One to many with deployments. A sensor may be delpoyed multiple times in its lifecycle
-    deployments: Mapped[List["Deployment"]] = relationship() 
-
-    def __repr__(self):
-        return f"<Sensor ({self.sensor_id})>" # the representation of the class for debuging etc.
-    
-class Location(Base):
-    __tablename__ = "location_table"
-
-    # Primary key
-    location_id: Mapped[int] = mapped_column(primary_key=True)
-
-    # Other columns for locations
-    name: Mapped[str]
-    description: Mapped[Optional[str]]
-    LSN: Mapped[Optional[str]]
-    zip: Mapped[Optional[str]]
-    lat: Mapped[float]
-    lon: Mapped[float]
-
-    # Point for location
-    geometry = mapped_column(Geometry('POINT')) # Map Point geometry, see https://geoalchemy-2.readthedocs.io/en/stable/orm_tutorial.html#orm-tutorial
-
-    # Many deployments to one location:
-    #   Each location may have multiple deployments over time if a sensor changes
-    #   A location may also have multiple sensor deployed
-    #   This will also need to populate in deployments
-    deployments: Mapped[List["Deployment"]] = relationship(back_populates="location")
-
-    def __repr__(self):
-        return f"<Location ({self.location_id}, {self.name})>"
+    # Map columns
+    id = Column(Integer, primary_key=True)
+    mac_addr = Column(String)
+    registration_email = Column(String)
+    located_outside = Column(Boolean)
+    deployment_name = relationship('Deployment', uselist=False, back_populates='name')
+    public = Column(Boolean)
 
 
 class Deployment(Base):
-    __tablename__ = "deployment_table"
+    __tablename__ = 'deployments'
 
-    # Primary Key
-    deploy_id: Mapped[int] = mapped_column(primary_key=True)
+    id = Column(Integer, primary_key=True)
 
-    # Foreign keys for populating sensor and locations
-    sensor_id: Mapped[int] = mapped_column(ForeignKey("sensor_table.sensor_id"))
-    location_id: Mapped[int] = mapped_column(ForeignKey("location_table.location_id"))
+    # Populate id from registration table
+    registration_id = Column(Integer, ForeignKey('registrations.id')) 
 
-    # The beginning and end of the deployment
-    start_date: Mapped[date]
-    end_date: Mapped[date | None] = mapped_column(nullable=True)
+    # Population name used as deployment name from registration, 
+    # "Location Name" when registering on Purple Air
+    name = relationship('Registration', back_populates='deployment_name') 
+    index = Column(Integer)
+    start_date = Column(Date)
+    end_date = Column(Date)
 
-    # Each deployment is essentially the combination of a location, sensor, and time period.
-    sensor: Mapped["Sensor"] = relationship(back_populates="location")
-    location: Mapped["Location"] = relationship(back_populates="deployments")
+    # Deployments of a many to one relationships with locations, hotspots, contacts
+    location_id = Column(Integer, ForeignKey('locations.id'))
+    location = relationship('Location', back_populates='deployments')
+
+    hotspot_id = Column(Integer, ForeignKey('hotspots.id'))
+    hotspot = relationship('Hotspot', back_populates='deployments')
 
 
-    def __repr__(self):
-        return f"<Deployment ({self.deploy_id}, {self.location}, {self.start_date} - {self.end_date})>"
+    contact_id = Column(Integer, ForeignKey('contacts.id'))
+    contact_fullname = relationship('Contacts', back_populates='deployments')
 
-# class PM25(Base):
-#     __tablename__ = "pm25_table"
+class Location(Base):
+    __tablename__ = 'locations'
 
-#     pm25_id: Mapped[int] = mapped_column(primary_key=True)
-#     datetime: Mapped[datetime] = mapped_column(nullable=False)
-#     value: Mapped[float] = mapped_column(nullable=False)
-#     unit: Mapped[str]
+    id = Column(Integer, primary_key=True)
+    deployments = relationship('Deployment', back_populates='location')
+    location_name = Column(String)
+    location_desc = Column(String)
+    latitude = Column(Float)
+    Longitude = Column(Float)
+    Altitude = Column(Float)
 
-#     sensor_id: Mapped[int] = mapped_column(ForeignKey("othername_table.othertable_id"))
-#     othertable: Mapped["Table"] = relationship(back_populates="")
+class Hotspot(Base):
+    __tablename__ = 'hotspots'
+
+    id = Column(Integer, primary_key=True)
+    deployments = relationship('Deployment', back_populates='hotspot')
+    serial = Column(String)
+    mac_addr = Column(String)
+    ssid = Column(String)
+    pwd = Column(String)
+
+class Contact(Base):
+    __tablename__ = 'contacts'
+
+    id = Column(Integer, primary_key=True)
+    deployments = relationship('Deployments', back_populates='contact_fullname')
+    fullname = Column(String)
+    email = Column(String)
+    phone = Column(String)
+
+
+Base.metadata.create_all(bind=engine)
+
+
+
+
+
+
+
+    
 
 
 
