@@ -57,7 +57,7 @@ class Deployment(Base):
 
 
     contact_id = Column(Integer, ForeignKey('contacts.id'))
-    contact_fullname = relationship('Contacts', back_populates='deployments')
+    contact_fullname = relationship('Contact', back_populates='deployments')
 
     def __init__(self, id, registration_id, name, index, start_date, end_date, location, hotspot, contact_fullname):
         self.id = id
@@ -121,7 +121,7 @@ class Contact(Base):
     __tablename__ = 'contacts'
 
     id = Column(Integer, primary_key=True)
-    deployments = relationship('Deployments', back_populates='contact_fullname')
+    deployments = relationship('Deployment', back_populates='contact_fullname')
     firstname = Column(String)
     lastname = Column(String)
     fullname = column_property(firstname + " " + lastname)
