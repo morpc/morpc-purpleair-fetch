@@ -2,6 +2,8 @@
 from datetime import date
 import logging
 
+from narwhals import col
+
 logger = logging.getLogger(__name__)
 
 with open('.env') as env:
@@ -34,6 +36,32 @@ DATA_FIELDS = [
         'pm10.0_atm_a', 'pm10.0_atm_b', 'pm10.0_cf_1_a', 'pm10.0_cf_1_b',
         '0.3_um_count', '0.5_um_count', '1.0_um_count', '2.5_um_count', '5.0_um_count', '10.0_um_count', 
         ]
+
+DATA_FIELDS_MAP = {
+        'humidity': 'humidity',
+        'temperature': 'temperature',
+        'pressure': 'pressure',
+        'pm1.0_atm_a': 'pm010_atm_a',
+        'pm1.0_atm_b': 'pm010_atm_b',
+        'pm1.0_cf_1_a': 'pm010_cf_1_a',
+        'pm1.0_cf_1_b': 'pm010_cf_1_a',
+        'pm2.5_alt_a': 'pm025_alt_a',
+        'pm2.5_alt_b': 'pm025_alt_b',  
+        'pm2.5_atm_a': 'pm025_atm_a', 
+        'pm2.5_atm_b': 'pm025_atm_b', 
+        'pm2.5_cf_1_a': 'pm025_cf_1_a', 
+        'pm2.5_cf_1_b': 'pm025_cf_1_b',
+        'pm10.0_atm_a': 'pm100_atm_a', 
+        'pm10.0_atm_b': 'pm100_atm_b', 
+        'pm10.0_cf_1_a': 'pm100_cf_1_a', 
+        'pm10.0_cf_1_b': 'pm100_cf_1_b',
+        '0.3_um_count': 'um_count_003',
+        '0.5_um_count': 'um_count_005',
+        '1.0_um_count': 'um_count_010',
+        '2.5_um_count': 'um_count_025',
+        '5.0_um_count': 'um_count_050',
+        '10.0_um_count': 'um_count_100'
+}
 
 DATA_FIELDS_QUERY = [f"{x}|d3" for x in DATA_FIELDS] # Assign the number of decimals to return for pm data
 
@@ -385,10 +413,12 @@ def get_members_data(group_id):
     df.columns = [x.replace('|d3','') if x.endswith('|d3') else x for x in df.columns]
     df['time_stamp'] = [datetime.datetime.fromtimestamp(x, datetime.timezone.utc) for x in df['last_seen']]
     df = df[['sensor_index', 'time_stamp'] + [col for col in DATA_FIELDS if col not in ['time_stamp', 'sensor_index']]]
+    df.columns = [DATA_FIELDS_MAP[x] if x not in ['sensor_index', 'time_stamp'] else x for x in df.columns]
+    df = df.rename(columns={'sensor_index': 'index'})
 
     return df
 
-def get_member_history(group_id, member_id, start=None, end=None, average=0, by_sensor_index=True):
+def get_member_history(group_id, member_id, start=None, end=None, average=0):
     """
     Retrieves historical data from the purple API for a given member of a group. 
 
@@ -424,9 +454,6 @@ def get_member_history(group_id, member_id, start=None, end=None, average=0, by_
                 43200 (1-month)	    20 years
                 525600 (1-year) 	100 years
     
-    by_sensor_index : bool
-        If True, converts the memeber id to a sensor id and drop member id and group columns. 
-        If False, maintains member and group ids to convert later. See get_members_history.
 
     Returns:
     --------
@@ -475,12 +502,10 @@ def get_member_history(group_id, member_id, start=None, end=None, average=0, by_
     df['group_id'] = group_id
     df['time_stamp'] = [datetime.datetime.fromtimestamp(x, datetime.timezone.utc) for x in df['time_stamp']]
 
-    if by_sensor_index:
-        df['sensor_index'] = sensorid_from_memberid(group_id=group_id, member_ids=df['member_id'])
-        df = df[['sensor_index', 'time_stamp'] + [col for col in DATA_FIELDS if col not in ['time_stamp', 'sensor_index']]]
-
-    else: 
-        df = df[['member_id', 'group_id', 'time_stamp'] + [col for col in DATA_FIELDS if col not in ['member_id', 'group_id', 'time_stamp']]]
+    df['sensor_index'] = sensorid_from_memberid(group_id=group_id, member_ids=df['member_id'])
+    df = df[['sensor_index', 'time_stamp'] + [col for col in DATA_FIELDS if col not in ['time_stamp', 'sensor_index']]]
+    df.columns = [DATA_FIELDS_MAP[x] if x not in ['sensor_index', 'time_stamp'] else x for x in df.columns]
+    df = df.rename(columns={'sensor_index': 'index'})
 
     return df
 
@@ -501,6 +526,8 @@ def get_members_history(group_id, start, end, average=0):
     df = pd.concat(df)
     df['sensor_id'] = sensorid_from_memberid(group_id, df['member_id'])
     df = df[['sensor_index', 'time_stamp'] + [col for col in DATA_FIELDS if col not in ['time_stamp', 'sensor_index']]]
+    df.columns = [DATA_FIELDS_MAP[x] if x not in ['sensor_index', 'time_stamp'] else x for x in df.columns]
+    df = df.rename(columns={'sensor_index': 'index'})
 
     return df
     
@@ -510,3 +537,48 @@ def sensorid_from_memberid(group_id, member_ids):
     [id_map.update({x: y}) for x,y,z in [sensor.values() for sensor in details['members']]]
     
     return member_ids.map(id_map)
+
+def get_sensor_history(sensor_index, start=None, end=None, average=0):
+    import pandas as pd
+    import datetime
+    logger.info(f"Getting data for sensor {sensor_index} between {start} and {end}, readings averaged every {average} minutes.")
+
+    params = {
+        'fields': ",".join(DATA_FIELDS_QUERY),
+        'average': average
+    }
+
+    if start != None:
+        if not isinstance(start, date):
+            logger.debug(f"Converting {start} to date.")
+            try:
+                start = pd.to_datetime(start, yearfirst=True).strftime('%s')
+            except Exception as e:
+                logger.error(f'Start parameter must be a date or convertible by pd.to_datetime: {e}')
+                raise pd.errors.ParserError
+        else:
+            start = start.strftime('%s')
+        params.update({'start_timestamp': start})
+
+    if end != None:
+        if not isinstance(end, date):
+            logger.debug(f"Converting {end} to date.")
+            try:
+                end = pd.to_datetime(end, yearfirst=True).strftime('%s')
+            except Exception as e:
+                logger.error(f'End parameter must be a date or convertible by pd.to_datetime: {e}')
+                raise pd.errors.ParserError
+        else:
+            end = end.strftime('%s')
+        params.update({'end_timestamp': end})
+
+    json = get_json_safely(f"https://api.purpleair.com/v1/sensors/{sensor_index}/history", headers=read_header, params=params)
+    logger.debug(f"{json}")
+    df = pd.DataFrame([x for x in json['data']], columns=json['fields'])
+    df.columns = [x.replace('|d3','') if x.endswith('|d3') else x for x in df.columns]
+    df['time_stamp'] = [datetime.datetime.fromtimestamp(x, datetime.timezone.utc) for x in df['time_stamp']]
+    df['sensor_index'] = sensor_index
+    df = df[['sensor_index', 'time_stamp'] + [col for col in DATA_FIELDS if col not in ['time_stamp', 'sensor_index']]]
+    df.columns = [DATA_FIELDS_MAP[x] if x not in ['sensor_index', 'time_stamp'] else x for x in df.columns]
+
+    return df
