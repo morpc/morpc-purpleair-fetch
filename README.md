@@ -40,3 +40,14 @@ data = purpleair.get_members_data(group['group_id'])
 ```
 
 See `DEV-morpc-purpleair-fetch.ipynb` for a step-by-step walkthrough. The schemas for the output tables are in `output_data/`.
+
+Dates passed as `start`/`end` without a timezone are treated as UTC.
+
+## Tests
+
+The tests mock the API, so no keys or network access are needed:
+
+```
+pip install pytest
+python -m pytest tests
+```
