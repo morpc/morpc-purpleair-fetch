@@ -2,8 +2,6 @@
 from datetime import date
 import logging
 
-from narwhals import col
-
 logger = logging.getLogger(__name__)
 
 with open('.env') as env:
@@ -188,88 +186,6 @@ def get_organization():
 
     return json
 
-def get_deployed_sensors(log_path, start = None, end = None, sheet_name = "Deployment Log"):
-    """
-    Fetch list of sensor indexes.
-
-    Parameters:
-    -----------
-    log_path : path_like
-        A string of path of deployment log
-
-    sheet_name : str
-        The sheet name that contains the deployment log
-
-    Return:
-    -------
-    list
-        A list of sensor indexes of deployed sensors
-    """
-    import pandas as pd
-    import math
-    import datetime
-
-    logger.debug(f"Reading deployment log from {log_path}, sheet_name {sheet_name}")
-    today = pd.to_datetime(datetime.datetime.today())
-
-    deployments = pd.read_excel(log_path, sheet_name=sheet_name).drop(0)
-    deployments['Deployment_Start'] = [pd.to_datetime(x) for x in deployments['Deployment_Start']]
-    deployments['Deployment_End'] = [today if pd.isnull(x) else x for x in deployments['Deployment_End']]
-    deployments = deployments.loc[(~deployments['Sensor ID Deployment'].str.endswith('00'))]
-
-    logger.debug(f"converting deployment {start} and {end} to interval.")
-
-    deployments['Deployment_Period'] = [pd.Interval(x, y) for x, y in zip(deployments['Deployment_Start'], deployments['Deployment_End'])]
-
-    if (start == None) & (end == None):
-        logger.info(f"Getting all currently deployed sensors as of {today}.")
-        deployed = deployments.loc[(deployments['Deployment_End'] == today)]
-    
-    else:
-        if start != None:
-            if not isinstance(start, date):
-                logger.debug(f"Converting {start} to date.")
-                try:
-                    start = pd.to_datetime(start, yearfirst=True)
-                except Exception as e:
-                    logger.error(f'Start parameter must be a date or convertible by pd.to_datetime: {e}')
-                    raise pd.errors.ParserError
-            else:
-                logger.debug(f'Start date: {start}')
-
-        if end != None:
-            if not isinstance(end, date):
-                logger.debug(f"Converting {end} to date.")
-                try:
-                    end = pd.to_datetime(end, yearfirst=True)
-                except Exception as e:
-                    logger.error(f'Start parameter must be a date or convertible by pd.to_datetime: {e}')
-                    raise pd.errors.ParserError
-            else:
-                logger.debug(f"End date: {end}")
-
-        elif end == None:
-            logger.info(f"No end date provided. Using {today}")
-            end = today
-
-        logger.debug(f'Creating interval for filtering deployments from {start} to {end}')
-        interval = pd.Interval(start, end)
-            
-        logger.info(f'Getting all sensors deployed during {interval}')
-        deployed = []
-        for i, row in deployments.iterrows():
-            if row.Deployment_Period.overlaps(interval):
-                deployed.append(row)
-        deployed = pd.concat(deployed)
-        
-        if len(deployed) == 0:
-            logger.warning(f"Dates {start.strftime('%Y-%m-%d')} through {end.strftime('%Y-%m-%d')} return zero sensors. Check dates.")
-        
-    sensor_index = [int(x) for x in deployed.Sensor_Index_ID if not math.isnan(x)]
-    logger.info(f"{len(sensor_index)} Sensors: {", ".join([str(x) for x in sensor_index])}")
-
-    return sensor_index
-
 def post_group(group_name):
     logger.info(f"Creating new group with name {group_name}. See get_group for all current groups.")
 
@@ -315,6 +231,22 @@ def delete_member(group_id, sensor_index):
     delete_safely(f"{GROUPS_URL}/{group_id}/members/{sensor_index}", headers=write_header)
 
 def check_group_members(sensor_index, group_id):
+    """
+    Compare a list of sensor indexes to the current members of a PurpleAir API group.
+
+    Parameters:
+    -----------
+    sensor_index : list of int
+        The sensor indexes that should be members of the group.
+
+    group_id : int
+        The id number for the group. See get_groups().
+
+    Returns:
+    --------
+    dict
+        {'to_add': [...], 'to_remove': [...]} to pass to update_group_members().
+    """
 
     details = get_group_details(group_id=group_id)
     in_group = [x['sensor_index'] for x in details['members']]
