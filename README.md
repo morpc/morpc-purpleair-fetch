@@ -1,15 +1,42 @@
 # morpc-purpleair-fetch
 
-This repository stores the process for fetching air quality data from the purple air API and storing it in a local sqlite database. 
+A minimal example of pulling air quality sensor data from the [PurpleAir API](https://api.purpleair.com) with Python.
 
-## Introduction
+## Requirements
 
-In July 2025, MORPC Data Team began a process to update process which fetched, stored, and process air quaility sensor data. At the time, Ramboll was collecting data from the purple air API and MORPC was getting data from their Google Cloud database (see [morpc-airquality-shair(](https://github.com/morpc/morpc-airquality-shair)). This script fetches data from three sources (data previously stored locally on MORPC Sharepoint, Ramboll data, and PurpleAir API sensor) and stores them in a SQLite database with SpatiaLite extionsion support. 
+- Python 3.12+ with `requests` and `pandas`
+- Read and Write API keys from PurpleAir (see the [PurpleAir Developer Dashboard](https://develop.purpleair.com))
 
-## Roadmap
+## Setup
 
- - [ ] 1. Develop air quality sensor model for sqlite database, including Sensor Deployment Tracking sheet.
- - [ ] 2. Fetch script for Ramboll database and input into MORPC sqlite database.
- - [ ] 3. Input data from MORPC sharepoint into sqlite database. This may also act as a script for manual downloads using the [PurpleAir Data Download tool](https://gitlab.com/purpleair-api-clients/data-download-tool/-/tree/main)
- - [X] 4. Fetch data directly from PurpleAir API.
- - [ ] 5. Automate fetch to pull data from PurpleAir.
+Create a `.env` file in the directory you run from (it is ignored by git):
+
+```
+READ_KEY=your-read-key
+WRITE_KEY=your-write-key
+```
+
+## Usage
+
+`purpleair.py` wraps the PurpleAir API endpoints. Sensors are identified by their sensor index, which is shown in the URL when you select a sensor on the [PurpleAir map](https://map.purpleair.com).
+
+```python
+import purpleair
+
+sensor_index = [33773]  # replace with your sensor indexes
+
+# Historical data for a single sensor
+history = purpleair.get_sensor_history(33773, start='2021-07-23', end='2021-08-06', average=60)
+
+# Keep a PurpleAir group in sync with your list of sensors
+group = purpleair.post_group('my-sensors')  # or pick an existing id from purpleair.get_groups()
+update = purpleair.check_group_members(sensor_index=sensor_index, group_id=group['group_id'])
+purpleair.update_group_members(update=update, group_id=group['group_id'])
+
+# Metadata, health, and latest readings for every sensor in the group
+metadata = purpleair.get_members_metadata(group['group_id'])
+health = purpleair.get_members_health(group['group_id'])
+data = purpleair.get_members_data(group['group_id'])
+```
+
+See `DEV-morpc-purpleair-fetch.ipynb` for a step-by-step walkthrough. The schemas for the output tables are in `output_data/`.
