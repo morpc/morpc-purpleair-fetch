@@ -2,15 +2,15 @@
 from datetime import date
 import logging
 
-from narwhals import col
-
 logger = logging.getLogger(__name__)
 
 with open('.env') as env:
     lines = env.readlines()
     env = {}
     for line in lines:
-        k, v = line.split('=')
+        if not line.strip() or line.startswith('#'):
+            continue
+        k, v = line.split('=', 1)
         env[k] = v.strip()
 
 # Construct headers
@@ -44,7 +44,7 @@ DATA_FIELDS_MAP = {
         'pm1.0_atm_a': 'pm010_atm_a',
         'pm1.0_atm_b': 'pm010_atm_b',
         'pm1.0_cf_1_a': 'pm010_cf_1_a',
-        'pm1.0_cf_1_b': 'pm010_cf_1_a',
+        'pm1.0_cf_1_b': 'pm010_cf_1_b',
         'pm2.5_alt_a': 'pm025_alt_a',
         'pm2.5_alt_b': 'pm025_alt_b',  
         'pm2.5_atm_a': 'pm025_atm_a', 
@@ -70,11 +70,11 @@ AVERAGE_LIMITS = {
     10:	[60, 'days'],
     30:	[90, 'days'],
     60:	[180, 'days'],
-    360:	[1, 'year'],
-    1440:	[2, 'years'],
-    10080:	[5, 'years'],
-    43200:	[20, 'years'],
-    525600:	[100, 'years'],
+    360:	[365, 'days'],
+    1440:	[730, 'days'],
+    10080:	[1825, 'days'],
+    43200:	[7300, 'days'],
+    525600:	[36500, 'days'],
 }
 
 def get_json_safely(url, headers, params=None):
@@ -84,14 +84,14 @@ def get_json_safely(url, headers, params=None):
     r = requests.get(url, headers=headers, params=params)
     if r.status_code != 200:
         logger.error(f"Request content: {r.content}")
-        raise requests.HTTPError
+        raise requests.HTTPError(f"{r.status_code} error for {r.url}", response=r)
     else:
         logger.debug(f"Request successful. Decoding return JSON.")
         try:
             json = r.json()
-        except:
+        except requests.JSONDecodeError:
             logger.error(f"JSONDecoderError. Check the url. {r.url}")
-            raise requests.JSONDecodeError
+            raise
     r.close()
 
     return json
@@ -103,14 +103,14 @@ def post_safely(url, headers, params=None):
     r = requests.post(url, headers=headers, params=params)
     if r.status_code != 201:
         logger.error(f"Request content: {r.content}")
-        raise requests.HTTPError
+        raise requests.HTTPError(f"{r.status_code} error for {r.url}", response=r)
     else:
         logger.debug(f"Request successful. Decoding return JSON.")
         try:
             json = r.json()
-        except:
+        except requests.JSONDecodeError:
             logger.error(f"JSONDecoderError. Check the url. {r.url}")
-            raise requests.JSONDecodeError
+            raise
     r.close()
 
     return json
@@ -119,10 +119,10 @@ def delete_safely(url, headers, params=None):
     import requests
 
     logger.info(f"Deleting data at {url} with parameters {params}.")
-    r = requests.post(url, headers=headers, params=params)
+    r = requests.delete(url, headers=headers, params=params)
     if r.status_code != 204:
         logger.error(f"Request content: {r.content}")
-        raise requests.HTTPError
+        raise requests.HTTPError(f"{r.status_code} error for {r.url}", response=r)
     else:
         logger.debug(f"Delete successful.")
     r.close()
@@ -166,7 +166,7 @@ def check_interval(interval, average):
     freq = pd.Timedelta(value=AVERAGE_LIMITS[average][0], unit=AVERAGE_LIMITS[average][1])
 
     if interval.length > freq:
-        interval_list = split_interval(interval=interval, average=freq)
+        interval_list = split_interval(interval=interval, freq=freq)
         logger.info(f"{interval} is longer than allowable {freq} returning list of {len(interval_list)} intervals")
         return interval_list
     else:
@@ -177,7 +177,10 @@ def split_interval(interval, freq):
     import pandas as pd
 
     logger.info(f"Splitting {interval} by {freq}")
-    range = pd.interval_range(interval.left, interval.right, freq=freq).to_list()
+    breaks = pd.date_range(interval.left, interval.right, freq=freq).to_list()
+    if breaks[-1] != interval.right:
+        breaks.append(interval.right)  # keep the final partial period
+    range = pd.IntervalIndex.from_breaks(breaks).to_list()
 
     return range
 
@@ -187,88 +190,6 @@ def get_organization():
     json = get_json_safely(ORG_URL, read_header)
 
     return json
-
-def get_deployed_sensors(log_path, start = None, end = None, sheet_name = "Deployment Log"):
-    """
-    Fetch list of sensor indexes.
-
-    Parameters:
-    -----------
-    log_path : path_like
-        A string of path of deployment log
-
-    sheet_name : str
-        The sheet name that contains the deployment log
-
-    Return:
-    -------
-    list
-        A list of sensor indexes of deployed sensors
-    """
-    import pandas as pd
-    import math
-    import datetime
-
-    logger.debug(f"Reading deployment log from {log_path}, sheet_name {sheet_name}")
-    today = pd.to_datetime(datetime.datetime.today())
-
-    deployments = pd.read_excel(log_path, sheet_name=sheet_name).drop(0)
-    deployments['Deployment_Start'] = [pd.to_datetime(x) for x in deployments['Deployment_Start']]
-    deployments['Deployment_End'] = [today if pd.isnull(x) else x for x in deployments['Deployment_End']]
-    deployments = deployments.loc[(~deployments['Sensor ID Deployment'].str.endswith('00'))]
-
-    logger.debug(f"converting deployment {start} and {end} to interval.")
-
-    deployments['Deployment_Period'] = [pd.Interval(x, y) for x, y in zip(deployments['Deployment_Start'], deployments['Deployment_End'])]
-
-    if (start == None) & (end == None):
-        logger.info(f"Getting all currently deployed sensors as of {today}.")
-        deployed = deployments.loc[(deployments['Deployment_End'] == today)]
-    
-    else:
-        if start != None:
-            if not isinstance(start, date):
-                logger.debug(f"Converting {start} to date.")
-                try:
-                    start = pd.to_datetime(start, yearfirst=True)
-                except Exception as e:
-                    logger.error(f'Start parameter must be a date or convertible by pd.to_datetime: {e}')
-                    raise pd.errors.ParserError
-            else:
-                logger.debug(f'Start date: {start}')
-
-        if end != None:
-            if not isinstance(end, date):
-                logger.debug(f"Converting {end} to date.")
-                try:
-                    end = pd.to_datetime(end, yearfirst=True)
-                except Exception as e:
-                    logger.error(f'Start parameter must be a date or convertible by pd.to_datetime: {e}')
-                    raise pd.errors.ParserError
-            else:
-                logger.debug(f"End date: {end}")
-
-        elif end == None:
-            logger.info(f"No end date provided. Using {today}")
-            end = today
-
-        logger.debug(f'Creating interval for filtering deployments from {start} to {end}')
-        interval = pd.Interval(start, end)
-            
-        logger.info(f'Getting all sensors deployed during {interval}')
-        deployed = []
-        for i, row in deployments.iterrows():
-            if row.Deployment_Period.overlaps(interval):
-                deployed.append(row)
-        deployed = pd.concat(deployed)
-        
-        if len(deployed) == 0:
-            logger.warning(f"Dates {start.strftime('%Y-%m-%d')} through {end.strftime('%Y-%m-%d')} return zero sensors. Check dates.")
-        
-    sensor_index = [int(x) for x in deployed.Sensor_Index_ID if not math.isnan(x)]
-    logger.info(f"{len(sensor_index)} Sensors: {", ".join([str(x) for x in sensor_index])}")
-
-    return sensor_index
 
 def post_group(group_name):
     logger.info(f"Creating new group with name {group_name}. See get_group for all current groups.")
@@ -315,6 +236,22 @@ def delete_member(group_id, sensor_index):
     delete_safely(f"{GROUPS_URL}/{group_id}/members/{sensor_index}", headers=write_header)
 
 def check_group_members(sensor_index, group_id):
+    """
+    Compare a list of sensor indexes to the current members of a PurpleAir API group.
+
+    Parameters:
+    -----------
+    sensor_index : list of int
+        The sensor indexes that should be members of the group.
+
+    group_id : int
+        The id number for the group. See get_groups().
+
+    Returns:
+    --------
+    dict
+        {'to_add': [...], 'to_remove': [...]} to pass to update_group_members().
+    """
 
     details = get_group_details(group_id=group_id)
     in_group = [x['sensor_index'] for x in details['members']]
@@ -348,7 +285,7 @@ def update_group_members(update, group_id):
         logger.debug('No sensors to add.')
 
     if len(update['to_remove']) > 0:
-        logger.debug(f'Removing sensors {', '.join({[str(x) for x in update['to_remove']]})} from {group_id}')
+        logger.debug(f'Removing sensors {', '.join([str(x) for x in update['to_remove']])} from {group_id}')
         for sensor in update['to_remove']:
             delete_member(group_id, sensor)
     else:
@@ -474,24 +411,24 @@ def get_member_history(group_id, member_id, start=None, end=None, average=0):
         if not isinstance(start, date):
             logger.debug(f"Converting {start} to date.")
             try:
-                start = pd.to_datetime(start, yearfirst=True).strftime('%s')
+                start = int(pd.to_datetime(start, yearfirst=True).timestamp())
             except Exception as e:
                 logger.error(f'Start parameter must be a date or convertible by pd.to_datetime: {e}')
                 raise pd.errors.ParserError
         else:
-            start = start.strftime('%s')
+            start = int(pd.Timestamp(start).timestamp())
         params.update({'start_timestamp': start})
 
     if end != None:
         if not isinstance(end, date):
             logger.debug(f"Converting {end} to date.")
             try:
-                end = pd.to_datetime(end, yearfirst=True).strftime('%s')
+                end = int(pd.to_datetime(end, yearfirst=True).timestamp())
             except Exception as e:
                 logger.error(f'End parameter must be a date or convertible by pd.to_datetime: {e}')
                 raise pd.errors.ParserError
         else:
-            end = end.strftime('%s')
+            end = int(pd.Timestamp(end).timestamp())
         params.update({'end_timestamp': end})
 
     json = get_json_safely(f"{GROUPS_URL}/{group_id}/members/{member_id}/history", headers=read_header, params=params)
@@ -514,28 +451,21 @@ def get_members_history(group_id, start, end, average=0):
     
     details = get_group_details(group_id)
     members = [x['id'] for x in details['members']]
-    id_map = {}
-    [id_map.update({x: y}) for x,y,z in [sensor.values() for sensor in details['members']]]
     logger.info(f"Getting data between {start} and {end} for all {len(members)} members of group {group_id}.")
 
     df = []
     for member in members:
-        member_data = get_member_history(member, sensor_index=False, average=average)
+        member_data = get_member_history(group_id, member, start=start, end=end, average=average)
         df.append(member_data)
 
     df = pd.concat(df)
-    df['sensor_id'] = sensorid_from_memberid(group_id, df['member_id'])
-    df = df[['sensor_index', 'time_stamp'] + [col for col in DATA_FIELDS if col not in ['time_stamp', 'sensor_index']]]
-    df.columns = [DATA_FIELDS_MAP[x] if x not in ['sensor_index', 'time_stamp'] else x for x in df.columns]
-    df = df.rename(columns={'sensor_index': 'index'})
 
     return df
     
 def sensorid_from_memberid(group_id, member_ids):
     details = get_group_details(group_id)
-    id_map = {}
-    [id_map.update({x: y}) for x,y,z in [sensor.values() for sensor in details['members']]]
-    
+    id_map = {x['id']: x['sensor_index'] for x in details['members']}
+
     return member_ids.map(id_map)
 
 def get_sensor_history(sensor_index, start=None, end=None, average=0):
@@ -552,24 +482,24 @@ def get_sensor_history(sensor_index, start=None, end=None, average=0):
         if not isinstance(start, date):
             logger.debug(f"Converting {start} to date.")
             try:
-                start = pd.to_datetime(start, yearfirst=True).strftime('%s')
+                start = int(pd.to_datetime(start, yearfirst=True).timestamp())
             except Exception as e:
                 logger.error(f'Start parameter must be a date or convertible by pd.to_datetime: {e}')
                 raise pd.errors.ParserError
         else:
-            start = start.strftime('%s')
+            start = int(pd.Timestamp(start).timestamp())
         params.update({'start_timestamp': start})
 
     if end != None:
         if not isinstance(end, date):
             logger.debug(f"Converting {end} to date.")
             try:
-                end = pd.to_datetime(end, yearfirst=True).strftime('%s')
+                end = int(pd.to_datetime(end, yearfirst=True).timestamp())
             except Exception as e:
                 logger.error(f'End parameter must be a date or convertible by pd.to_datetime: {e}')
                 raise pd.errors.ParserError
         else:
-            end = end.strftime('%s')
+            end = int(pd.Timestamp(end).timestamp())
         params.update({'end_timestamp': end})
 
     json = get_json_safely(f"https://api.purpleair.com/v1/sensors/{sensor_index}/history", headers=read_header, params=params)
